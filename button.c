@@ -34,55 +34,68 @@ struct usb_dev_handle *initPanel(unsigned int devnum) {
 		}
 	}
 	if(GPdevice == NULL) {
-		fprintf(stderr, "ERROR: USB Glitter Panel was not found!\n");
-		return(NULL);
+		fprintf(stderr, "ERROR: USB button was not found!\n");
+		printf("Did you perhaps forget to sudo or add a udev rule?\n");
+		return NULL;
 	}
 	GPhandle = usb_open(GPdevice);
 	if(GPhandle == NULL) {
-		fprintf(stderr, "ERROR: USB Glitter Panel could not be opened!\n");
-		return(NULL);
+		fprintf(stderr, "ERROR: USB button could not be opened!\n");
+		printf("Did you perhaps forget to sudo or add a udev rule?\n");
+		return NULL;
 	}
-	//fprintf(stderr, "INFO: USB Glitter Panel found on %s, %s.\n", GPbus->dirname, GPdevice->filename);
 	return GPhandle;
 }
 
 int main(int argc, char **argv) {
 	struct usb_dev_handle *dev = initPanel(0);
 	if(dev == NULL) {
-		fprintf(stderr, "ERROR: Couldn't initialize USB Glitter Panel!\n");
-		return(EXIT_FAILURE);
+		fprintf(stderr, "ERROR: Couldn't initialize USB button!\n");
+		return 2;
 	}
 
-	char data[8];
-	//data[0] = atoi(argv[1]);
-	//usb_interrupt_write(dev, 0x02, (char *)data, 1, 1000);
-	char last = 0;
-	while(1){
-		usb_interrupt_read(dev, 0x01, data, 1, 1000);
-		//printf("%x\n", data[0]&0xff);
-		if((data[0] & 0xF) == 5){
-			if(last != 5){
-				printf("button pressed\n");
-				last = 5;
-			}
-		}else if((data[0] & 0xF) == 2){
-			if(last != 2){
-				printf("foo\n");
-				last = 2;
-			}
-		}else if((data[0] & 0xF) == 4){
-			if(last != 4){
-				printf("bar\n");
-				last = 4;
-			}
-		}else{
-			last = 0;
+	if(argc == 2){
+		unsigned char cmd = 0;
+		if (strcmp("open", argv[1])) {
+			cmd = 96; //alternatively: 224
+		} else if(strcmp("close", argv[1])) {
+			cmd = 80; //alternatively: 208
+		} else {
+			printf("Please specify a command (open/close)\n");
+			return 1;
 		}
-		usleep(10000);
+		usb_interrupt_write(dev, 0x02, &cmd, 1, 1000);
+	}else if(argc == 1){
+		unsigned char data;
+		unsigned char last = 0;
+		while(1){
+			if(!usb_interrupt_read(dev, 0x01, &data, 1, 1000)){
+				//printf("%x\n", data);
+				unsigned char c = 64;
+				if(last != data){
+					if((data & 0xF) == 5)
+						printf("button pressed\n");
+					if(data & 0x2)
+						printf("open button pressed\n");
+					if(data == 0x68)
+						printf("opening\n");
+					if(data == 0x74)
+						printf("closing\n");
+					if(data == 0x44 && last == 0x60)
+						printf("open\n");
+					if(data == 0x58)
+						printf("closed\n");
+					last = data;
+				}
+				usb_interrupt_write(dev, 0x02, &c, 1, 1000);
+				usleep(100000);
+			}
+		}
+	}else{
+		printf("Invalid argument. Specify open/close to open/close or nothing to listen.\n");
+		return 1;
 	}
-
 	usb_close(dev);
-	//fprintf(stderr, "Done.\n");
-	return(EXIT_SUCCESS);
+	return 0;
 }
 
