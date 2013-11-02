@@ -64,13 +64,17 @@ int main(int argc, char **argv) {
 
 	if(argc == 2){
 		unsigned char cmd = 64;
-		if (!strcmp("open", argv[1])) {
+		if (!strcmp("close", argv[1])) {
 			cmd = 96; //alternatively: 224
-		} else if(!strcmp("close", argv[1])) {
+		} else if(!strcmp("open", argv[1])) {
 			cmd = 80; //alternatively: 208
 		} else {
 			printf("Please specify a command (open/close)\n");
 			return 1;
+		}
+		if((ec = usb_interrupt_write(dev, 0x02, &cmd, 1, 10)) < 0){
+			printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
+			return 2;
 		}
 	}else if(argc == 1){
 		unsigned char data;
