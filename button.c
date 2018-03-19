@@ -92,16 +92,16 @@ int main(int argc, char **argv) {
     }
   }
   else if(argc == 1) {
-    unsigned char data;
+    unsigned char data = 0;
     unsigned char last = 0;
     unsigned int state = 0;
 
     fcntl(0, F_SETFL, fcntl(0, F_GETFL, 0) | O_NONBLOCK);
 
     while(1) {
-      if(!usb_interrupt_read(pDev, 0x01, &data, 1, 1)) {
-        // printf("%x\n", data);
+      if(!usb_interrupt_read(pDev, 0x81, &data, 1, 10)) {
         unsigned char c = 64;
+
         if(last != data) {
           if((data & 0xF) == 5)
             printf("button pressed\n");
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
             last = data;
         }
 
-        if((ec = usb_interrupt_write(pDev, 0x02, &c, 1, 1)) < 0) {
+        if((ec = usb_interrupt_write(pDev, 0x02, &c, 1, 10)) < 0) {
           printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
           return 2;
         }
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
           else if(data == 'o')
             cmd = 80;
 
-          if((ec = usb_interrupt_write(pDev, 0x02, &cmd, 1, 1)) < 0) {
+          if((ec = usb_interrupt_write(pDev, 0x02, &cmd, 1, 10)) < 0) {
             printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
 
             return 2;
