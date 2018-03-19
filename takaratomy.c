@@ -1,4 +1,3 @@
-#include <usb.h>
 #include <stdio.h>
 #include "takaratomy.h"
 
@@ -10,15 +9,14 @@ struct usb_dev_handle* initPanel(unsigned int devnum) {
   struct usb_device* pGpdevice     = NULL;
   struct usb_dev_handle* pGphandle = NULL;
 
-  //Initialize libusb and have it scan for devices
   usb_init();
   usb_find_busses();
   usb_find_devices();
+
   pBusses = usb_get_busses();
 
-  for(pBus = pBusses; pBus; pBus = pBus->next) {  //iterate over the linked list of USB busses.  usb_bus->next = NULL on the last device
-    for(pDev = pBus->devices; pDev; pDev = pDev->next) {  //iterate over the linked list of devices in this bus.  usb_bu
-      //fprintf(stderr, "%s %s %X %X\n", bus->dirname, dev->filename, dev->descriptor.idVendor, dev->descriptor.idProduct);
+  for(pBus = pBusses; pBus; pBus = pBus->next) {
+    for(pDev = pBus->devices; pDev; pDev = pDev->next) {
       if((pDev->descriptor.idVendor == VENDORID) && (pDev->descriptor.idProduct == PRODUCTID)) {
         if(devnum == 0) {
           pGpbus = pBus;
