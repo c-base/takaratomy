@@ -2,6 +2,7 @@
 #include <string.h>
 #include <usb.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 #include "takaratomy.h"
 
@@ -24,6 +25,24 @@ int main(int argc, char** ppArgv) {
 			cmd = CMD_OPEN;
 		else {
 		  printf("Please specify a command (open/close)\n");
+
+      // quick hack for LED matrix:
+      // 0: maybe command: 0x80 = Light up all LEDS
+      // 1: unknown
+      // 2: LED brightness
+      // 3: unknown
+      // 4: unknown
+      // 5: unknown
+      // 6: unknown
+      // 7: unknown
+
+      // unsigned char pBuf[8] = { 0x80, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+      // if((ec = usb_interrupt_write(pDev, 0x02, pBuf, 8, 10)) < 0) {
+      //   printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
+      //   return 2;
+      // }
+      // --
 
 			return 1;
 		}
