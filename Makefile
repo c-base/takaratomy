@@ -1,2 +1,2 @@
-all: button.c takaratomy.c
-	gcc -o button -std=gnu11 button.c takaratomy.c -lusb
+all: main.c takaratomy.c
+	gcc -o button -std=gnu11 main.c takaratomy.c -lusb
