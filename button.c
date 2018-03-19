@@ -9,11 +9,11 @@
 #include "button.h"
 
 struct usb_dev_handle* initPanel(unsigned int devnum) {
-	struct usb_bus* pBus;
-	struct usb_bus* pBusses;
-	struct usb_bus* pGpbus;
-	struct usb_device* pDev;
-	struct usb_device* pGpdevice = NULL;
+	struct usb_bus* pBus             = NULL;
+	struct usb_bus* pBusses          = NULL;
+	struct usb_bus* pGpbus           = NULL;
+	struct usb_device* pDev          = NULL;
+	struct usb_device* pGpdevice     = NULL;
 	struct usb_dev_handle* pGphandle = NULL;
 
 	//Initialize libusb and have it scan for devices
@@ -29,29 +29,34 @@ struct usb_dev_handle* initPanel(unsigned int devnum) {
 				if(devnum == 0) {
 					pGpbus = pBus;
 					pGpdevice = pDev;
-				} else {
-					devnum--;
 				}
+        else
+					devnum--;
 			}
 		}
 	}
 
-	if(pGpdevice == NULL) {
+	if(!pGpdevice) {
 		fprintf(stderr, "ERROR: USB button was not found!\n");
 		printf("Did you perhaps forget to sudo or add a udev rule?\n");
+
 		return NULL;
 	}
 
 	pGphandle = usb_open(pGpdevice);
-	if(pGphandle == NULL) {
+
+	if(!pGphandle) {
 		fprintf(stderr, "ERROR: USB button could not be opened!\n");
 		printf("Did you perhaps forget to sudo or add a udev rule?\n");
+
 		return NULL;
 	}
 
 	usb_set_debug(1);
+
 	if(usb_claim_interface(pGphandle, 0) < 0){
 		fprintf(stderr, "ERROR: Cannot claim interface!\n");
+
 		return NULL;
 	}
 
