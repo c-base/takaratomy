@@ -79,6 +79,11 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
           error = closeButtonLid(hDev);
         else if(data == 'o')
           error = openButtonLid(hDev);
+        else if(data == 'q') {
+          printf("quitting...\n");
+
+          return 0;
+        }
 
         if(error)
           return error;
