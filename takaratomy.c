@@ -50,23 +50,26 @@ struct usb_dev_handle* openButton(unsigned int devNum) {
   return hDev;
 }
 
-static int sendUsbCommand(struct usb_dev_handle* pDev, unsigned char cmd) {
+static int sendUsbCommand(struct usb_dev_handle* hDev, unsigned char cmd) {
   int ec;
 
-  if((ec = usb_interrupt_write(pDev, 0x02, &cmd, 1, 10)) < 0) {
+  if((ec = usb_interrupt_write(hDev, 0x02, &cmd, 1, 10)) < 0) {
     printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
     return 2;
   }
 
   return 0;
-
 }
 
-int openLid(struct usb_dev_handle* pDev) {
-  return sendUsbCommand(pDev, CMD_OPEN);
+int requestButtonState(struct usb_dev_handle* hDev) {
+  return sendUsbCommand(hDev, CMD_REQUEST_STATE);
 }
 
-int closeLid(struct usb_dev_handle* pDev) {
-  return sendUsbCommand(pDev, CMD_CLOSE);
+int openButtonLid(struct usb_dev_handle* hDev) {
+  return sendUsbCommand(hDev, CMD_OPEN);
+}
+
+int closeButtonLid(struct usb_dev_handle* hDev) {
+  return sendUsbCommand(hDev, CMD_CLOSE);
 }
 
