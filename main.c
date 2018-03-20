@@ -37,17 +37,20 @@ static int runQuickMode(struct usb_dev_handle* hDev, const char* pCmd) {
 }
 
 static int runInteractiveMode(struct usb_dev_handle* hDev) {
+  printf("Running in interactive mode.\n");
+  printf("'o': open lid\n");
+  printf("'c': close lid\n");
+  printf("'q': quit\n");
+
+  fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK);
+
   unsigned char data = 0;
   unsigned char last = 0;
   unsigned int state = 0;
   int error = 0;
 
-  fcntl(0, F_SETFL, fcntl(0, F_GETFL, 0) | O_NONBLOCK);
-
   while(1) {
     if(!usb_interrupt_read(hDev, 0x81, &data, 1, 10)) {
-      unsigned char c = 64;
-
       if(last != data) {
         if((data & 0x0F) == 5)
           printf("button pressed\n");
@@ -69,7 +72,7 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
         return error;
     }
 
-    int len = read(0, &data, 1);
+    int len = read(STDIN_FILENO, &data, 1);
 
     if(len > 0) {
       if(state == 0) {
