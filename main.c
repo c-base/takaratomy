@@ -8,21 +8,19 @@
 
 int main(int argc, char** ppArgv) {
 	int ec = 0;
-	struct usb_dev_handle* pDev = initPanel(0);
+	struct usb_dev_handle* pDev = openButton(0);
 
 	if(!pDev) {
-		fprintf(stderr, "ERROR: Couldn't initialize USB button!\n");
+		fprintf(stderr, "ERROR: Couldn't open USB button!\n");
 
 		return 2;
 	}
 
 	if(argc == 2) {
-		unsigned char cmd = 64;
-
 		if (!strcmp("close", ppArgv[1]))
-			cmd = CMD_CLOSE;
+      ec = closeLid(pDev);
 		else if(!strcmp("open", ppArgv[1]))
-			cmd = CMD_OPEN;
+			ec = openLid(pDev);
 		else {
 		  printf("Please specify a command (open/close)\n");
 
@@ -44,13 +42,11 @@ int main(int argc, char** ppArgv) {
       // }
       // --
 
-			return 1;
+			ec = 1;
 		}
 
-    if((ec = usb_interrupt_write(pDev, 0x02, &cmd, 1, 10)) < 0) {
-	    printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
-      return 2;
-    }
+    if(ec)
+      return ec;
   }
   else if(argc == 1) {
     unsigned char data = 0;
@@ -89,21 +85,16 @@ int main(int argc, char** ppArgv) {
       int len = read(0, &data, 1);
 
       if(len > 0) {
-        char cmd;
-
         if(state == 0) {
           state = 1;
 
           if(data == 'c')
-            cmd = CMD_CLOSE;
+            ec = closeLid(pDev);
           else if(data == 'o')
-            cmd = CMD_OPEN;
+            ec = openLid(pDev);
 
-          if((ec = usb_interrupt_write(pDev, 0x02, &cmd, 1, 10)) < 0) {
-            printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
-
-            return 2;
-          }
+          if(ec)
+            return ec;
         }
         else {
           if(data == '\n')
