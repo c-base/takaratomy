@@ -14,24 +14,6 @@ static int runQuickMode(struct usb_dev_handle* hDev, const char* pCmd) {
   else {
     printf("Please specify a command (open/close)\n");
 
-    // quick hack for LED matrix:
-    // 0: maybe command: 0x80 = Light up all LEDS
-    // 1: unknown
-    // 2: LED brightness
-    // 3: unknown
-    // 4: unknown
-    // 5: unknown
-    // 6: unknown
-    // 7: unknown
-
-    // unsigned char pBuf[8] = { 0x80, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-    // if((ec = usb_interrupt_write(hDev, 0x02, pBuf, 8, 10)) < 0) {
-    //   printf("Error writing to USB device (%d): %s\n", ec, usb_strerror());
-    //   return 2;
-    // }
-    // --
-
     return 1;
   }
 }
@@ -102,26 +84,26 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
 }
 
 int main(int argc, char** ppArgv) {
-	int error = 0;
-	struct usb_dev_handle* hDev = openButton(0);
+  int error = 0;
+  struct usb_dev_handle* hDev = openButton(0);
 
-	if(!hDev) {
-		fprintf(stderr, "ERROR: Couldn't open USB button!\n");
+  if(!hDev) {
+    fprintf(stderr, "ERROR: Couldn't open USB button!\n");
 
-		return 2;
-	}
+    return 2;
+  }
 
-	if(argc == 2)
+  if(argc == 2)
     error = runQuickMode(hDev, ppArgv[1]);
   else if(argc == 1)
     error = runInteractiveMode(hDev);
   else {
-		printf("Invalid argument. Specify open/close to open/close or nothing to listen.\n");
-		error = 1;
-	}
+    printf("Invalid argument. Specify open/close to open/close or nothing to listen.\n");
+    error = 1;
+  }
 
-	usb_close(hDev);
+  usb_close(hDev);
 
-	return error;
+  return error;
 }
 
