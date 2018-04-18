@@ -41,12 +41,14 @@ class Takaratomy:
       BASEDIR = os.path.dirname(os.path.realpath(__file__))
       self.lib = ctypes.cdll.LoadLibrary(os.path.join(BASEDIR, 'takaratomy.so'))
 
-      self.lib.openButton.restype      = ctypes.c_void_p
-      self.lib.argtypes                = [ctypes.c_uint32]
-      self.lib.openButtonLid.restype   = ctypes.c_int32
-      self.lib.openButtonLid.argtypes  = [ctypes.c_void_p]
-      self.lib.closeButtonLid.restype  = ctypes.c_int32
-      self.lib.closeButtonLid.argtypes = [ctypes.c_void_p]
+      self.lib.requestButtonState.restype  = ctypes.c_uint32
+      self.lib.requestButtonState.argtypes = [ctypes.c_void_p]
+      self.lib.openButton.restype          = ctypes.c_void_p
+      self.lib.openButton.argtypes         = [ctypes.c_uint32]
+      self.lib.openButtonLid.restype       = ctypes.c_int32
+      self.lib.openButtonLid.argtypes      = [ctypes.c_void_p]
+      self.lib.closeButtonLid.restype      = ctypes.c_int32
+      self.lib.closeButtonLid.argtypes     = [ctypes.c_void_p]
 
     def openButton(self, devnum):
       self.handle = self.lib.openButton(devnum)
@@ -55,8 +57,10 @@ class Takaratomy:
 
     #TODO: implement closeButton function
 
+    def requestButtonState(self):
+      return self.lib.requestButtonState(self.handle)
+
     def openButtonLid(self):
-      print('now using handle: %s' % hex(self.handle))
       return self.lib.openButtonLid(self.handle)
 
     def closeButtonLid(self):
@@ -67,6 +71,11 @@ if __name__ == '__main__':
 
     b = Takaratomy()
     res = b.openButton(0)
+
+    while(True):
+      state = b.requestButtonState() # TODO: improve c-api
+      print('Button state: %d', state)
+      sleep(0.5)
 
     print('Now opening lid...')
     print('Button: %s' % hex(res))
