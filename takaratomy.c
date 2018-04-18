@@ -73,7 +73,6 @@ int closeButtonLid(struct usb_dev_handle* hDev) {
   return sendUsbCommand(hDev, CMD_CLOSE);
 }
 
-
 // quick hack for LED matrix:
 // 0: maybe command: 0x80 = Light up all LEDS
 // 1: unknown
