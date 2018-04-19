@@ -38,49 +38,49 @@ class ShutdownButton(msgflo.Participant):
 
 class Takaratomy:
     def __init__(self):
-      BASEDIR = os.path.dirname(os.path.realpath(__file__))
-      self.lib = ctypes.cdll.LoadLibrary(os.path.join(BASEDIR, 'takaratomy.so'))
+        BASEDIR = os.path.dirname(os.path.realpath(__file__))
+        self.lib = ctypes.cdll.LoadLibrary(os.path.join(BASEDIR, 'takaratomy.so'))
 
-      self.lib.requestButtonState.restype  = ctypes.c_uint32
-      self.lib.requestButtonState.argtypes = [ctypes.c_void_p]
-      self.lib.openButton.restype          = ctypes.c_void_p
-      self.lib.openButton.argtypes         = [ctypes.c_uint32]
-      self.lib.openButtonLid.restype       = ctypes.c_int32
-      self.lib.openButtonLid.argtypes      = [ctypes.c_void_p]
-      self.lib.closeButtonLid.restype      = ctypes.c_int32
-      self.lib.closeButtonLid.argtypes     = [ctypes.c_void_p]
+        self.lib.getButtonState.restype      = ctypes.c_uint32
+        self.lib.getButtonState.argtypes     = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int32)]
+        self.lib.openButton.restype          = ctypes.c_void_p
+        self.lib.openButton.argtypes         = [ctypes.c_uint32]
+        self.lib.openButtonLid.restype       = ctypes.c_int32
+        self.lib.openButtonLid.argtypes      = [ctypes.c_void_p]
+        self.lib.closeButtonLid.restype      = ctypes.c_int32
+        self.lib.closeButtonLid.argtypes     = [ctypes.c_void_p]
 
     def openButton(self, devnum):
-      self.handle = self.lib.openButton(devnum)
-
-      return self.handle
+        self.handle = self.lib.openButton(devnum)
+        return self.handle
 
     #TODO: implement closeButton function
 
-    def requestButtonState(self):
-      return self.lib.requestButtonState(self.handle)
+    def getButtonState(self):
+        state = ctypes.c_int32(0)
+        res = self.lib.getButtonState(self.handle, ctypes.byref(state))
+        return state.value
 
     def openButtonLid(self):
-      return self.lib.openButtonLid(self.handle)
+        self.lib.openButtonLid(self.handle)
 
     def closeButtonLid(self):
-      return self.lib.closeButtonLid(self.handle)
+        self.lib.closeButtonLid(self.handle)
 
 if __name__ == '__main__':
     print('Shutdown Button')
 
     b = Takaratomy()
-    res = b.openButton(0)
+    b.openButton(0)
 
     while(True):
-      state = b.requestButtonState() # TODO: improve c-api
-      print('Button state: %d', state)
-      sleep(0.5)
+      state = b.getButtonState()
+      print('Button state: %d' % state)
+      sleep(0.1)
 
     print('Now opening lid...')
-    print('Button: %s' % hex(res))
 
-    res = b.openButtonLid()
+    b.openButtonLid()
 
     sleep(5)
     print('Now closing lid')
