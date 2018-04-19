@@ -35,7 +35,14 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
     if(error = getButtonState(hDev, &bState))
       return error;
 
-    printf("State: %d\n", bState);
+    switch(bState) {
+      case BUTTON_PRESSED: printf("button pressed\n"); break;
+      case OPEN_BUTTON_PRESSED: printf("open button pressed\n"); break;
+      case OPENING: printf("opening\n"); break;
+      case CLOSING: printf("closing\n"); break;
+      case OPEN: printf("open\n"); break;
+      case CLOSED: printf("closed\n"); break;
+    }
 
     unsigned char option;
 
@@ -87,7 +94,7 @@ int main(int argc, char** ppArgv) {
     error = 1;
   }
 
-  usb_close(hDev);
+  closeButton(hDev);
 
   return error;
 }

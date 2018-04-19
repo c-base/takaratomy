@@ -50,6 +50,10 @@ struct usb_dev_handle* openButton(unsigned int devNum) {
   return hDev;
 }
 
+void closeButton(struct usb_dev_handle* hDev) {
+  usb_close(hDev);
+}
+
 static int sendUsbCommand(struct usb_dev_handle* hDev, unsigned char cmd) {
   int ec;
 
@@ -77,35 +81,26 @@ int getButtonState(struct usb_dev_handle* hDev, enum ButtonState* pState) {
   if(bytesRead) {
     if(last != data) {
       if((data & 0x0F) == 5)
-        lastState = BUTTON_PRESSED;
+        *pState = BUTTON_PRESSED;
       if(data & 0x02)
-        lastState = OPEN_BUTTON_PRESSED;
+        *pState = OPEN_BUTTON_PRESSED;
       if(data == 0x68)
-        lastState = OPENING;
+        *pState = OPENING;
       if(data == 0x74)
-        lastState = CLOSING;
+        *pState = CLOSING;
       if(data == 0x44 && last == 0x60)
-        lastState = OPEN;
+        *pState = OPEN;
       if(data == 0x58)
-        lastState = CLOSED;
+        *pState = CLOSED;
 
       last = data;
-
-      switch(lastState) {
-        case BUTTON_PRESSED: printf("button pressed\n"); break;
-        case OPEN_BUTTON_PRESSED: printf("open button pressed\n"); break;
-        case OPENING: printf("opening\n"); break;
-        case CLOSING: printf("closing\n"); break;
-        case OPEN: printf("open\n"); break;
-        case CLOSED: printf("closed\n"); break;
-      }
     }
+    else
+      *pState = IDLE;
 
     if(error = requestButtonState(hDev))
       return error;
   }
-
-  *pState = lastState;
 
   return 0;
 }

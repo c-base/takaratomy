@@ -24,6 +24,7 @@ enum ButtonState {
 };
 
 struct usb_dev_handle* openButton(unsigned int devNum);
+void closeButton(struct usb_dev_handle* hDev);
 int getButtonState(struct usb_dev_handle* hDev, enum ButtonState* pState);
 int openButtonLid(struct usb_dev_handle* hDev);
 int closeButtonLid(struct usb_dev_handle* hDev);
