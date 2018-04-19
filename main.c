@@ -65,17 +65,19 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
         return error;
     }
 
-    int len = read(STDIN_FILENO, &data, 1);
+    unsigned char option;
+
+    int len = read(STDIN_FILENO, &option, 1);
 
     if(len > 0) {
       if(state == 0) {
         state = 1;
 
-        if(data == 'c')
+        if(option == 'c')
           error = closeButtonLid(hDev);
-        else if(data == 'o')
+        else if(option == 'o')
           error = openButtonLid(hDev);
-        else if(data == 'q') {
+        else if(option == 'q') {
           printf("quitting...\n");
 
           return 0;
@@ -85,7 +87,7 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
           return error;
       }
       else {
-        if(data == '\n')
+        if(option == '\n')
           state = 0;
       }
     }
