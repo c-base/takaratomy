@@ -13,6 +13,16 @@ enum Commands {
   CMD_CLOSE          = 0x60  // alternatively: 0xD0
 };
 
+enum ButtonState {
+  IDLE,
+  BUTTON_PRESSED,
+  OPEN_BUTTON_PRESSED,
+  OPENING,
+  CLOSING,
+  OPEN,
+  CLOSED
+};
+
 struct usb_dev_handle* openButton(unsigned int devNum);
 int requestButtonState(struct usb_dev_handle* hDev);
 int openButtonLid(struct usb_dev_handle* hDev);

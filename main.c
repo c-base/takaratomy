@@ -31,23 +31,34 @@ static int runInteractiveMode(struct usb_dev_handle* hDev) {
   unsigned int state = 0;
   int error = 0;
 
+  enum ButtonState bState = IDLE;
+
   while(1) {
     if(!usb_interrupt_read(hDev, 0x81, &data, 1, 10)) {
       if(last != data) {
         if((data & 0x0F) == 5)
-          printf("button pressed\n");
+          bState = BUTTON_PRESSED;
         if(data & 0x02)
-          printf("open button pressed\n");
+          bState = OPEN_BUTTON_PRESSED;
         if(data == 0x68)
-          printf("opening\n");
+          bState = OPENING;
         if(data == 0x74)
-          printf("closing\n");
+          bState = CLOSING;
         if(data == 0x44 && last == 0x60)
-          printf("open\n");
+          bState = OPEN;
         if(data == 0x58)
-          printf("closed\n");
+          bState = CLOSED;
 
         last = data;
+
+        switch(bState) {
+          case BUTTON_PRESSED: printf("button pressed\n"); break;
+          case OPEN_BUTTON_PRESSED: printf("open button pressed\n"); break;
+          case OPENING: printf("opening\n"); break;
+          case CLOSING: printf("closing\n"); break;
+          case OPEN: printf("open\n"); break;
+          case CLOSED: printf("closed\n"); break;
+        }
       }
 
       if(error = requestButtonState(hDev))
