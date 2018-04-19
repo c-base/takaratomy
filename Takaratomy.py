@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# when executing locally, do not forget the export:
-# export MSGFLO_BROKER=mqtt://c-beam/
-
 import ctypes
 import os.path
 from time import sleep

@@ -8,6 +8,9 @@ import gevent
 from Takaratomy import Takaratomy
 
 
+# when executing locally, do not forget the export:
+# export MSGFLO_BROKER=mqtt://c-beam/
+
 class ShutdownButton(msgflo.Participant):
     def __init__(self, role):
         b = Takaratomy()
