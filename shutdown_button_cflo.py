@@ -8,8 +8,10 @@ import gevent
 from Takaratomy import Takaratomy
 
 
-# when executing locally, do not forget the export:
-# export MSGFLO_BROKER=mqtt://c-beam/
+# when executing locally, do not forget to set MSGFLO_BROKER env variable:
+# bash: export MSGFLO_BROKER=mqtt://c-beam/
+# fish: set -x MSGFLO_BROKER mqtt://c-beam/
+
 
 class ShutdownButton(msgflo.Participant):
     def __init__(self, role):
@@ -17,15 +19,17 @@ class ShutdownButton(msgflo.Participant):
         b.open(0)
 
         d = {
-            'role': 'shutdown-button',
             'component': 'c-base/shutdown-button',
             'label': 'Shuts down the space station and initiates an evacuation',
             'icon': 'power-off',
-            'inports': [],
+            'inports': [
+                { 'id': 'do_not_use', 'type': 'bang' },
+            ],
             'outports': [
-                {'id': 'pressed', 'type': 'boolean'},
+                { 'id': 'pressed', 'type': 'boolean' },
             ],
         }
+
         msgflo.Participant.__init__(self, d, role)
 
     def process(self, inport, msg):
