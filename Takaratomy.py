@@ -35,7 +35,7 @@ class Takaratomy:
         res = self.lib.getButtonState(self.handle, ctypes.byref(state))
         v = state.value
 
-        return ButtonState(state.value)
+        return state.value
 
     def open_lid(self):
         self.lib.openButtonLid(self.handle)
