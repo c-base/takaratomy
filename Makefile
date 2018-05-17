@@ -1,4 +1,4 @@
-all: clean main.c takaratomy.o button
+all: clean button
 
 clean:
 	rm -f *.o
@@ -8,5 +8,5 @@ takaratomy.o: takaratomy.c
 	gcc -fPIC -shared takaratomy.c -std=gnu11 -lusb -o takaratomy.so
 
 button: takaratomy.o
-	gcc -o button -std=gnu11 main.c takaratomy.o -lusb
+	gcc -o button -std=gnu11 button.c takaratomy.o -lusb
 
