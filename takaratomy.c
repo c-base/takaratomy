@@ -50,7 +50,41 @@ struct usb_dev_handle* openButton(unsigned int devNum) {
   return hDev;
 }
 
+struct usb_dev_handle* openLedPanel(unsigned int devNum) {
+  struct usb_device* pDev = openUsbDevice(VENDORID, LED_MATRIX_PRODUCTID, devNum);
+
+  if(!pDev) {
+    fprintf(stderr, "ERROR: USB LED panel was not found!\n");
+    printf("Did you perhaps forget to sudo or add a udev rule?\n");
+
+    return NULL;
+  }
+
+  struct usb_dev_handle* hDev = usb_open(pDev);
+
+  if(!hDev) {
+    fprintf(stderr, "ERROR: USB LED panel could not be opened!\n");
+    printf("Did you perhaps forget to sudo or add a udev rule?\n");
+
+    return NULL;
+  }
+
+  usb_set_debug(1);
+
+  if(usb_claim_interface(hDev, 0) < 0) {
+    fprintf(stderr, "ERROR: Cannot claim interface!\n");
+
+    return NULL;
+  }
+
+  return hDev;
+}
+
 void closeButton(struct usb_dev_handle* hDev) {
+  usb_close(hDev);
+}
+
+void closeLedPanel(struct usb_dev_handle* hDev) {
   usb_close(hDev);
 }
 

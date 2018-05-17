@@ -32,9 +32,9 @@ int openButtonLid(struct usb_dev_handle* hDev);
 int closeButtonLid(struct usb_dev_handle* hDev);
 
 // LED Matrix:
-struct usb_dev_handle* openLedMatrix(unsigned int devNum);
-void closeLedMatrix(struct usb_dev_handle* hDev);
-void writeLedMatrix(struct usb_dev_handle* hDev, const void* pMatrix);
+struct usb_dev_handle* openLedPanel(unsigned int devNum);
+void closeLedPanel(struct usb_dev_handle* hDev);
+void writeLedPanel(struct usb_dev_handle* hDev, const void* pMatrix);
 
 #endif // _TAKARATOMY_H
 
