@@ -1,4 +1,4 @@
-all: clean button ledpanel
+all: clean button ledpanel takaratomy.so
 
 clean:
 	rm -f *.o *.so button ledpanel
