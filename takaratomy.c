@@ -51,7 +51,7 @@ struct usb_dev_handle* openButton(unsigned int devNum) {
   return hDev;
 }
 
-unsigned char GPblank[54] = {
+static unsigned const char _pBlank[54] = {
   0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x80, 0x03, 0x5c, 0x08, 0x00, 0x00,
@@ -62,8 +62,8 @@ unsigned char GPblank[54] = {
 };
 
 struct GPpacket {
-  char header[22];
-  unsigned short int data[16];
+  char pHeader[22];
+  unsigned short int pData[16];
 };
 
 static struct GPpacket _frameBuffer;
@@ -95,7 +95,7 @@ struct usb_dev_handle* openLedPanel(unsigned int devNum) {
     return NULL;
   }
 
-  memcpy(_frameBuffer.header, GPblank, 54);
+  memcpy(_frameBuffer.pHeader, _pBlank, 54);
 
   return hDev;
 }
@@ -178,17 +178,14 @@ int closeButtonLid(struct usb_dev_handle* hDev) {
 #define BIT6 (64)
 #define BIT7 (128)
 
-static void writePanel(struct usb_dev_handle* dev, struct GPpacket* packet) {
-  //Saw this in the bitstream, but doesn't seem to be needed.
-  //usb_interrupt_write(dev, 0x81, NULL, 0, 1000);
-  //usb_interrupt_read(dev, 0x81, NULL, 0, 1000);
-  usb_interrupt_write(dev, 0x02, (char*)packet, 54, 1000);
-  usb_interrupt_read(dev, 0x02, NULL, 0, 1000);
+static void writePanel(struct usb_dev_handle* hDev, struct GPpacket* pPacket) {
+  usb_interrupt_write(hDev, 0x02, (char*)pPacket, 54, 1000);
+  usb_interrupt_read(hDev, 0x82, NULL, 0, 1000);
 }
 
-void clearPanel(struct usb_dev_handle *dev) {
-  usb_interrupt_write(dev, 0x02, (char*)GPblank, 54, 1000);
-  usb_interrupt_read(dev, 0x02, NULL, 0, 1000);
+void clearPanel(struct usb_dev_handle *hDev) {
+  usb_interrupt_write(hDev, 0x02, (char*)_pBlank, 54, 1000);
+  usb_interrupt_read(hDev, 0x82, NULL, 0, 1000);
 }
 
 void swap16bytes(unsigned short int *array) {
@@ -229,27 +226,27 @@ inline int pget(unsigned short int* array, unsigned int x, unsigned int y) {
   return (array[y & 15] & (1 << ((x & 15) ^ BIT3)));
 }
 
-static void clearPacket(struct GPpacket *packet) {
-  packet->data[0] = 0;
-  packet->data[1] = 0;
-  packet->data[2] = 0;
-  packet->data[3] = 0;
-  packet->data[4] = 0;
-  packet->data[5] = 0;
-  packet->data[6] = 0;
-  packet->data[7] = 0;
-  packet->data[8] = 0;
-  packet->data[9] = 0;
-  packet->data[10] = 0;
-  packet->data[11] = 0;
-  packet->data[12] = 0;
-  packet->data[13] = 0;
-  packet->data[14] = 0;
-  packet->data[15] = 0;
+static void clearPacket(struct GPpacket* pPacket) {
+  pPacket->pData[0]  = 0;
+  pPacket->pData[1]  = 0;
+  pPacket->pData[2]  = 0;
+  pPacket->pData[3]  = 0;
+  pPacket->pData[4]  = 0;
+  pPacket->pData[5]  = 0;
+  pPacket->pData[6]  = 0;
+  pPacket->pData[7]  = 0;
+  pPacket->pData[8]  = 0;
+  pPacket->pData[9]  = 0;
+  pPacket->pData[10] = 0;
+  pPacket->pData[11] = 0;
+  pPacket->pData[12] = 0;
+  pPacket->pData[13] = 0;
+  pPacket->pData[14] = 0;
+  pPacket->pData[15] = 0;
 }
 
 void ledPanelSetPixel(struct usb_dev_handle* hDev, int x, int y) {
-  pset(_frameBuffer.data , x, y);
+  pset(_frameBuffer.pData , x, y);
   writePanel(hDev, &_frameBuffer);
 }
 
