@@ -35,8 +35,7 @@ int closeButtonLid(struct usb_dev_handle* hDev);
 struct usb_dev_handle* openLedPanel(unsigned int devNum);
 void closeLedPanel(struct usb_dev_handle* hDev);
 void ledPanelSetPixel(struct usb_dev_handle* hDev, int x, int y);
-
-void writeLedPanel(struct usb_dev_handle* hDev, const void* pMatrix);
+void ledPanelClear(struct usb_dev_handle* hDev);
 
 #endif // _TAKARATOMY_H
 

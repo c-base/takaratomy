@@ -183,7 +183,7 @@ static void writePanel(struct usb_dev_handle* hDev, struct GPpacket* pPacket) {
   usb_interrupt_read(hDev, 0x82, NULL, 0, 1000);
 }
 
-void clearPanel(struct usb_dev_handle *hDev) {
+void ledPanelClear(struct usb_dev_handle *hDev) {
   usb_interrupt_write(hDev, 0x02, (char*)_pBlank, 54, 1000);
   usb_interrupt_read(hDev, 0x82, NULL, 0, 1000);
 }
