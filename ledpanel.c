@@ -18,12 +18,13 @@ int main(int argc, char** ppArgv) {
 
   printf("LED panel has been opened\n");
 
-  // TODO: draw stuff here
+  for(int y = 0; y < 16; ++y)
+    for(int x = 0; x < 16; ++x)
+      ledPanelSetPixel(hDev, x, y);
 
-  ledPanelSetPixel(hDev, 0, 0);
-  ledPanelSetPixel(hDev, 1, 0);
+  sleep(1);
 
-
+  ledPanelClear(hDev);
   closeLedPanel(hDev);
 
   printf("LED panel has been closed\n");
