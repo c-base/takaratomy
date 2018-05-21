@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "takaratomy.h"
 
 static struct usb_device* openUsbDevice(int vendorId, int productId, unsigned int devNum) {
@@ -50,6 +51,23 @@ struct usb_dev_handle* openButton(unsigned int devNum) {
   return hDev;
 }
 
+unsigned char GPblank[54] = {
+  0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x80, 0x03, 0x5c, 0x08, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+struct GPpacket {
+  char header[22];
+  unsigned short int data[16];
+};
+
+static struct GPpacket _frameBuffer;
+
 struct usb_dev_handle* openLedPanel(unsigned int devNum) {
   struct usb_device* pDev = openUsbDevice(VENDORID, LED_MATRIX_PRODUCTID, devNum);
 
@@ -76,6 +94,8 @@ struct usb_dev_handle* openLedPanel(unsigned int devNum) {
 
     return NULL;
   }
+
+  memcpy(_frameBuffer.header, GPblank, 54);
 
   return hDev;
 }
@@ -146,6 +166,94 @@ int openButtonLid(struct usb_dev_handle* hDev) {
 int closeButtonLid(struct usb_dev_handle* hDev) {
   return sendUsbCommand(hDev, CMD_CLOSE);
 }
+
+// Provisional panel handling:
+
+#define BIT0 (1)
+#define BIT1 (2)
+#define BIT2 (4)
+#define BIT3 (8)
+#define BIT4 (16)
+#define BIT5 (32)
+#define BIT6 (64)
+#define BIT7 (128)
+
+static void writePanel(struct usb_dev_handle* dev, struct GPpacket* packet) {
+  //Saw this in the bitstream, but doesn't seem to be needed.
+  //usb_interrupt_write(dev, 0x81, NULL, 0, 1000);
+  //usb_interrupt_read(dev, 0x81, NULL, 0, 1000);
+  usb_interrupt_write(dev, 0x02, (char*)packet, 54, 1000);
+  usb_interrupt_read(dev, 0x02, NULL, 0, 1000);
+}
+
+void clearPanel(struct usb_dev_handle *dev) {
+  usb_interrupt_write(dev, 0x02, (char*)GPblank, 54, 1000);
+  usb_interrupt_read(dev, 0x02, NULL, 0, 1000);
+}
+
+void swap16bytes(unsigned short int *array) {
+  array[0] = (array[0] >> 8) | (array[0] << 8);
+  array[1] = (array[1] >> 8) | (array[1] << 8);
+  array[2] = (array[2] >> 8) | (array[2] << 8);
+  array[3] = (array[3] >> 8) | (array[3] << 8);
+  array[4] = (array[4] >> 8) | (array[4] << 8);
+  array[5] = (array[5] >> 8) | (array[5] << 8);
+  array[6] = (array[6] >> 8) | (array[6] << 8);
+  array[7] = (array[7] >> 8) | (array[7] << 8);
+  array[8] = (array[8] >> 8) | (array[8] << 8);
+  array[9] = (array[9] >> 8) | (array[9] << 8);
+  array[10] = (array[10] >> 8) | (array[10] << 8);
+  array[11] = (array[11] >> 8) | (array[11] << 8);
+  array[12] = (array[12] >> 8) | (array[12] << 8);
+  array[13] = (array[13] >> 8) | (array[13] << 8);
+  array[14] = (array[14] >> 8) | (array[14] << 8);
+  array[15] = (array[15] >> 8) | (array[15] << 8);
+}
+
+void pset(unsigned short int* array, unsigned int x, unsigned int y) {
+  // single on bit moved to the position modulo 16, byte swapped.
+  array[y & 15] |= 1 << ((x & 15) ^ BIT3);
+}
+
+inline void pclear(unsigned short int* array, unsigned int x, unsigned int y) {
+  //single on bit moved to the position modulo 16, byte swapped and inverted
+  array[y & 15] &= ~(1 << ((x & 15) ^ BIT3));
+}
+
+inline void ptoggle(unsigned short int* array, unsigned int x, unsigned int y) {
+  //single on bit moved to the position modulo 16, byte swapped.
+  array[y & 15] ^= 1 << ((x & 15) ^ BIT3);
+}
+
+inline int pget(unsigned short int* array, unsigned int x, unsigned int y) {
+  return (array[y & 15] & (1 << ((x & 15) ^ BIT3)));
+}
+
+static void clearPacket(struct GPpacket *packet) {
+  packet->data[0] = 0;
+  packet->data[1] = 0;
+  packet->data[2] = 0;
+  packet->data[3] = 0;
+  packet->data[4] = 0;
+  packet->data[5] = 0;
+  packet->data[6] = 0;
+  packet->data[7] = 0;
+  packet->data[8] = 0;
+  packet->data[9] = 0;
+  packet->data[10] = 0;
+  packet->data[11] = 0;
+  packet->data[12] = 0;
+  packet->data[13] = 0;
+  packet->data[14] = 0;
+  packet->data[15] = 0;
+}
+
+void ledPanelSetPixel(struct usb_dev_handle* hDev, int x, int y) {
+  pset(_frameBuffer.data , x, y);
+  writePanel(hDev, &_frameBuffer);
+}
+
+// --
 
 // quick hack for LED matrix:
 // 0: maybe command: 0x80 = Light up all LEDS

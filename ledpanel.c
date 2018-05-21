@@ -16,9 +16,17 @@ int main(int argc, char** ppArgv) {
     return 2;
   }
 
+  printf("LED panel has been opened\n");
+
   // TODO: draw stuff here
 
+  ledPanelSetPixel(hDev, 0, 0);
+  ledPanelSetPixel(hDev, 1, 0);
+
+
   closeLedPanel(hDev);
+
+  printf("LED panel has been closed\n");
 
   return error;
 }
